@@ -77,7 +77,7 @@ func WsEndpoint(w http.ResponseWriter, r *http.Request) {
 func ListenForWs(conn *WebSocketConnection) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println("Error", fmt.Sprintf("%v", r))
+			log.Println("Errorn ListenForWs", fmt.Sprintf("%v", r))
 		}
 	}()
 
@@ -86,7 +86,7 @@ func ListenForWs(conn *WebSocketConnection) {
 	for {
 		err := conn.ReadJSON(&payload)
 		if err != nil {
-			log.Println("Error while parsing json:", err)
+			// do nothing
 		} else {
 			payload.Conn = *conn
 			wsChan <- payload
@@ -106,6 +106,13 @@ func ListenToWsChannel() {
 			response.Action = "list_users"
 			response.ConnectedUsers = users
 			broadcastToAll(response)
+
+		case "left":
+			response.Action = "list_users"
+			delete(clients, e.Conn)
+			users := getUserList()
+			response.ConnectedUsers = users
+			broadcastToAll(response)
 		}
 	}
 }
@@ -113,7 +120,9 @@ func ListenToWsChannel() {
 func getUserList() []string {
 	var userList []string
 	for _, c := range clients {
-		userList = append(userList, c)
+		if c != "" {
+			userList = append(userList, c)
+		}
 	}
 	sort.Strings(userList)
 	return userList
