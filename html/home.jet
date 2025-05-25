@@ -43,15 +43,17 @@
                 <input type="text" name="message" id="message" class="form-control" autocomplete="false"/>
             </div>
 
-            <hr>
             <a href="javascript:void(0);"
-               class="btn btn-outline-secondary"
+               class="btn btn-outline-secondary mt-3 mb-3"
                id="sendBtn"
             >Send Message</a>
 
             <input type="hidden" name="action" id="action"/>
 
-            <hr/>
+            <div id="status" class="mt-2 float-end">
+
+            </div>
+
             <div id="output" class="chatbox">
 
             </div>
@@ -93,16 +95,24 @@
             reconnectInterval: 3000
         });
 
+        const offline = `<span class="badge bg-danger">Offline</span>`
+        const online = `<span class="badge bg-success">Connected</span>`
+        let statusDiv = document.getElementById("status")
+
         socket.onopen = () => {
             console.log("Successfully connected")
+            statusDiv.innerHTML = online
         }
 
         socket.onclose = () => {
             console.log("Connection closed")
+            statusDiv.innerHTML = offline
         }
 
-        socket.onerror = e => {
+        socket.onerror = () => {
             console.log("There was an error.")
+            // TODO: make consideration
+            statusDiv.innerHTML = offline
         }
 
         socket.onmessage = msg => {
